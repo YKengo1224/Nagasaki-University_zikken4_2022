@@ -1,0 +1,107 @@
+m255
+K4
+z2
+!s11f vlog 2020.1 2020.02, Feb 28 2020
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z0 d/home/users/kengo/work/B4/zikken4_2022
+valu16
+Z1 DXx6 sv_std 3 std 0 22 VYECXdT12H8WgbUP_5Y6:3
+Z2 !s110 1667542044
+!i10b 1
+!s100 ORSCIVP:JFIaLV=[l7?Yh0
+Z3 !s11b Dg1SIo80bB@j0V0VzS_@n1
+ICeL5730>lG2iGja76kE:I3
+Z4 VDg1SIo80bB@j0V0VzS_@n1
+S1
+R0
+Z5 w1667541926
+Z6 8risc16b.sv
+Z7 Frisc16b.sv
+!i122 0
+L0 438 48
+Z8 OV;L;2020.1;71
+r1
+!s85 0
+31
+Z9 !s108 1667542044.000000
+!s107 risc16b.sv|sim_risc16b.sv|
+Z10 !s90 sim_risc16b.sv|risc16b.sv|
+!i113 1
+Z11 tCvgOpt 0
+vreg_file
+R1
+R2
+!i10b 1
+!s100 `YQR@>8<MdH4oMP7X@V=H1
+R3
+INOcL]LCOeK]zGTSULU`jK0
+R4
+S1
+R0
+R5
+R6
+R7
+!i122 0
+L0 407 29
+R8
+r1
+!s85 0
+31
+R9
+Z12 !s107 risc16b.sv|sim_risc16b.sv|
+R10
+!i113 1
+R11
+vrisc16b
+R1
+R2
+!i10b 1
+!s100 CYAf=QEF8M07lG2FgYbab3
+R3
+IPBKF477nH9QZf744C^`Pf3
+R4
+S1
+R0
+R5
+R6
+R7
+!i122 0
+L0 3 402
+R8
+r1
+!s85 0
+31
+R9
+R12
+R10
+!i113 1
+R11
+vsim_risc16b
+R1
+R2
+!i10b 1
+!s100 A9XlHRKLB_RjCX^:EaSVd2
+R3
+I6g>7kHO`BTZhFY<G9MCV93
+R4
+S1
+R0
+w1666168953
+8sim_risc16b.sv
+Fsim_risc16b.sv
+!i122 0
+L0 4 124
+R8
+r1
+!s85 0
+31
+R9
+R12
+R10
+!i113 1
+R11
