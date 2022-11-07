@@ -2,7 +2,7 @@
 `default_nettype none
 
 module sim_risc16b;
-   localparam int  MAX_SIMULATION_CYCLES = 5000000;
+   localparam int  MAX_SIMULATION_CYCLES = 300000;
    localparam real CLOCK_FREQ_HZ   = 50e6;
    localparam real CLOCK_PERIOD_NS = 1e9 / CLOCK_FREQ_HZ;
    logic           clk, rst;
@@ -27,8 +27,8 @@ module sim_risc16b;
          clk = 1'b0;
        #(CLOCK_PERIOD_NS / 2)    
          print();
-         if (risc16b_inst.if_pc == 16'h0018) begin
-//            print();
+         if (risc16b_inst.if_pc == 16'h7fff) begin
+            //print();
 	   dump_and_finish();
 	 end
       end
@@ -77,8 +77,39 @@ module sim_risc16b;
       rst = 1'b0;      
    end
 
-   task print(); 
+   task print();
+      if(risc16b_inst.in_pixel_buffer['h4000] == 'h0063) begin 
+//      if(1) begin
       $write("==== clock: %1d ====\n", $rtoi($time / CLOCK_PERIOD_NS) - 1);
+
+	 $write("if_pc = %x\n",risc16b_inst.if_pc);
+	 
+      $write("if_ir = %x\n",risc16b_inst.if_ir);
+      $write("we = %b\n",risc16b_inst.we);
+      
+      $write("w_addr = %x\n",risc16b_inst.in_pibuf_waddr);
+	 $write("hoge ====  %x\n",risc16b_inst.in_pixel_buffer['h4000]);
+	 
+      
+    //  $write("stencil_buf3[0] = %x\n",risc16b_inst.stencil_buf3[0]);
+	 //  $write("stencil_buf2[1] = %x\n",risc16b_inst.stencil_buf2[1]);
+	 $write("buf_data = %x\n",risc16b_inst.buf_pixel);
+	 
+      $write("in_pixel_addr = %x\n",risc16b_inst.in_pixel_addr);
+     // $write("addr+1         = %x\n",risc16b_inst.out_pixel_addr+1);
+      
+     // $write("out_pixel_addr = %x\n",risc16b_inst.out_pixel_addr);
+     // $write("filter_pdata   = %x\n",risc16b_inst.filter_pdata);
+     // $write("calc_pixel     = %d\n",risc16b_inst.calc_pixel);
+      
+     // $write("d_addr         = %x\n",d_addr);
+     // $write("d_dout         = %x\n",d_dout);
+
+     // $write("d_we           = %x\n",d_we);
+      
+      
+      
+      /*
       $write(" if_pc= %x  if_ir= %b (%x)\n",
              risc16b_inst.if_pc, risc16b_inst.if_ir, risc16b_inst.if_ir);
       $write(" i_addr= %x  i_din= %x  i_oe= %b\n", 
@@ -105,14 +136,15 @@ module sim_risc16b;
       $write(" if_pc_bta= %x  if_pc_we= %b ", 
              risc16b_inst.if_pc_bta, risc16b_inst.if_pc_we);
       $write(" led= %x\n\n", led);
-
+       
 
       $write(" regs:");
       for (int i = 0; i < 8; i++) begin
          $write(" %x", risc16b_inst.reg_file_inst.registers[i]);
       end
       $write("\n\n");
-
+       */
+	 end
    endtask 
 
    task dump_and_finish();

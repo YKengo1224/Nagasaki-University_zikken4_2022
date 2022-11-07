@@ -18,7 +18,7 @@ CHECKER  = check_$(SIM_TOP)
 PGM_FILE = $(SIM_TOP).pgm
 IMG_DUMP = $(SIM_TOP).dump
 IMG_DIR  = imfiles
-REF_DUMP = nega.dump
+REF_DUMP = answer.dump
 
 
 

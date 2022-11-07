@@ -1,0 +1,1 @@
+Warning (10268): Verilog HDL information at risc16b.sv(428): always construct contains both blocking and non-blocking assignments File: /home/users/kengo/work/B4/zikken4_2022/risc16b.sv Line: 428
