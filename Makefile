@@ -34,7 +34,7 @@ all: smart.log $(PROJECT).asm.rpt $(PROJECT).sta.rpt $(PROJECT).resource.html
 clean:
 	rm -rf *.rbf *.rpt *.chg smart.log *.htm *.eqn *.pin *.sof *.jdi \
 	*.pof db INCA_libs ncverilog.log incremental_db *~ \
-	*.sld *_pin_model_dump.txt *.done *.html *.dump \
+v	*.sld *_pin_model_dump.txt *.done *.html *.dump \
 	$(ASSIGNMENT_FILES) *.summary *.smsg *.dpf *.qws \
 	*.shm *.wlf *.log $(SIM_WORK) transcript
 
@@ -118,3 +118,7 @@ check: $(CHECKER)
 	./$(CHECKER) $(IMG_DUMP) $(PGM_FILE)
 	diff $(IMG_DUMP) $(IMG_DIR)/$(REF_DUMP)
 
+
+ASSEMBLER = assemble.py
+assemble:$(ASSEMBLER)
+	python3.8 $(ASSEMBLER)

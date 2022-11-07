@@ -14,52 +14,16 @@
      output logic [1:0]  d_we
      );
 
-   logic [15:0] 	 alu_ain, alu_bin, alu_dout;
-   logic [3:0] 		 alu_op;
-   logic [2:0] 		 reg_file_rnum1, reg_file_rnum2, reg_file_wnum;
-   logic [15:0] 	 reg_file_dout1, reg_file_dout2, reg_file_din;
-   logic 		 reg_file_we;
 
-
+//------------------------IF-------------------------------------   
    logic [15:0] 	 if_pc;// Program Counter
    logic [15:0] 	 if_ir;// Instruction Register
-   logic [15:0] 	 if_pc_bta;
-   logic 		 if_pc_we = 1'b0 ;
-   
-
-   
-   logic [15:0] 	 ex_result_reg = 16'd0; // Result Register
-   logic [15:0] 	 ex_ir;// Instruction Register
-   logic [15:0] 	 ex_result_in ;
-   logic 		 ex_reg_file_we_in;
-   logic 		 ex_reg_file_we_reg;
-
-
-   
-   
-   alu16 alu16_inst(.ain(alu_ain), .bin(alu_bin), .op(alu_op), .dout(alu_dout));
-
-   reg_file reg_file_inst
-     (.clk(clk), .rst(rst), .we(reg_file_we),
-      .rnum1(reg_file_rnum1), .rnum2(reg_file_rnum2), .wnum(reg_file_wnum),
-      .dout1(reg_file_dout1), .dout2(reg_file_dout2), .din(reg_file_din));
-
-   // IF (Instruction Fetch)   
-   //logic [15:0] 	 if_pc; // Program Counter
-   //logic [15:0] 	 if_ir; // Instruction Register 
-   //logic [15:0] 	 if_pc_bta;
-   //logic 		 if_pc_we = 1'b0 ;
-   
-   
-   
    
    always_ff @(posedge clk) begin
       if (rst)
-        if_pc <= 16'd0;
-      else if (if_pc_we==1'b0)
-	if_pc <= if_pc + 16'd2;
+        if_pc <= 16'hfe00;
       else
-        if_pc <= if_pc_bta;      
+        if_pc <= if_pc + 16'h0002;      
    end
 
    always_ff @(posedge clk) begin
@@ -71,417 +35,251 @@
 
    assign i_oe = 1'b1;
    assign i_addr = if_pc;
-   
-   // ID (Instruction Decode)
-   logic [15:0]   id_operand_reg1, id_operand_reg2; // Operand Registers
-   logic [15:0]   id_ir; // Instruction Register
-   logic [15:0]   id_imm_reg;
-   logic [15:0]   id_pc;
-   logic [15:0]   id_operand_in1;
-   logic [15:0]   id_imm_in;
-  
-   
-   assign reg_file_rnum1 = if_ir[10:8];
-   assign reg_file_rnum2 = if_ir[7:5];
+//-----------------------------------------------------
 
-
-   always_comb begin
-      if(ex_reg_file_we_in == 1'b1 && if_ir[10:8] == id_ir[10:8])
-	id_operand_in1 <= ex_result_in;
-      else if(ex_reg_file_we_reg == 1'b1 && if_ir[10:8] == ex_ir[10:8])
-	id_operand_in1 <= ex_result_reg;
-      else
-	id_operand_in1 <= reg_file_dout1;
-   end
-   
-   always_comb begin   
-      if(if_ir[7]==1'b1 & (if_ir[15:11] == 5'b00100 | if_ir[15:11] == 5'b01100 | if_ir[15:11] == 5'b01101 | if_ir[15:11] == 5'b01110))
-	id_imm_in <= {8'hff,if_ir[7:0]};
-
-      else if(if_ir[15]==1'b1)
-	id_imm_in <= {8'hff,if_ir[7:0]};
-
-      else
-	id_imm_in <= {8'h00,if_ir[7:0]};
-   end
-   
-
-  always_comb
-    begin
-       if(if_ir[15]==1'b1) begin
-	  
-	 if(if_ir[14:11]==4'b0000) begin
-	   if(id_operand_in1 == 16'd0)
-	     if_pc_we <= 1'b1;
-	   else
-	     if_pc_we <= 1'b0;
-	 end
- 
-	 else if(if_ir[14:11]==4'b0001) begin
-	   if(id_operand_in1 != 16'd0)
-	     if_pc_we <= 1'b1;
-	   else
-	     if_pc_we <= 1'b0;
-	 end
-	  
-	 else if(if_ir[14:11]==4'b0010) begin
-	   if(id_operand_in1[15] == 1'b1)
-	     if_pc_we <= 1'b1;
-	   else
-	     if_pc_we <= 1'b0;
-	 end
-	  
-	 else if(if_ir[14:11]==4'b0011) begin
-           if(id_operand_in1[15] == 1'b0)
-	     if_pc_we <= 1'b1;  
-           else
-	     if_pc_we <= 1'b0;
-	 end
-	  
-	 else if(if_ir[14:11]==4'b1000) 
-	   if_pc_we <= 1'b1;
-	 else
-	   if_pc_we <=1'b0;
-       
-       end // if (if_ir[15]==1'b1)
-
-       else
-	 if_pc_we <= 1'b0;
-    end // always_comb
-
-   always_comb begin
-      if_pc_bta = if_pc + id_imm_in;
-   end
    
    
+//-----------------------pixel_fifo---------------------
+   
+   localparam integer BITWIDTH = 16;
+   localparam integer FRAME_SIZE = 128;
+   localparam integer KERNEL_SIZE = 3;                //3,5,7
+   localparam integer BUFFER_SIZE = FRAME_SIZE*FRAME_SIZE;
+   localparam integer ADDR_BITWIDTH = clog2(BUFFER_SIZE);
+   localparam integer LINE_SIZE = FRAME_SIZE - KERNEL_WIDTH;
+   
+   
+   (*ram_style = "block"*)
+   reg [BUFFER_SIZE-1:0] pixel_buffer[BITWIDTH-1:0];
+   
+   reg 			 pibuf_re_addr[ADDR_BITWIDTH:0];
+   reg 			 pibuf_we_addr[ADDR_BITWIDTH:0];
+   
+   
+   wire [BITWIDTH-1:0] 	 pibuf_re_data;
+   wire [BITWODTH-1:0] 	 buf_pixel;
+   
+
    always_ff @(posedge clk) begin
-      if (rst)
-        id_operand_reg1 <= 16'd0;
-      else 
-	id_operand_reg1 <= id_operand_in1;
-	 
+      if(rst) 
+	pibuf_re_addr <= 'd0;
+      else if(pibuf_re_addr == BUFFER_SIZE-1)
+	pibuf_re_addr <= 'd0;
+      else
+	pibuf_re_addr <= pibuf_re_addr + 'd1;
    end
    
    always_ff @(posedge clk) begin
-      if (rst)
-        id_operand_reg2 <= 16'd0;
+      if(rst)
+	pibuf_we_addr <= 'd1;
+      else
+	pibuf_we_addr <= pibuf_we_addr + 'd2;
+   end
+
+   always_ff @(posedge clk) begin
+      pixel_buffer[pibuf_we_addr] <= if_ir[15:8];
+      pixel_buffer[pibuf_we_addr+1]  <= if_ir[7:0];
+   end
+   
+   always_ff @(posedge clk) begin
+      if(rst)
+	pibuf_re_data <= 'd0;
+      else
+	pibuf_re_data <= pixel_buffer[pibuf_re_addr];
+   end
+
+   
+   assign buf_pixel = pibuf_re_data;
+
+   //------------pixel_address------------------------------
+   reg [BITWIDTH-1:0] pixel_addr;
+   wire [BITWIDTH-1:0] in_pixel_addr;
+   wire [BITWIDTH-1:0] out_pixel_addr;
+   
+   
+   always_ff @(posedge clk) begin
+      if(rst)
+	pixel_addr <= 'd0;
       else begin
-	 if(ex_reg_file_we_in == 1'b1 && if_ir[7:5] == id_ir[10:8])
-	   id_operand_reg2 <= ex_result_in;
-	 else if(ex_reg_file_we_reg == 1'b1 && if_ir[7:5] == ex_ir[10:8])
-	   id_operand_reg2 <= ex_result_reg;
+	 if(pixel_addr == 'd0)
+	   pixel_addr <= 16'hff00;
 	 else
-           id_operand_reg2 <= reg_file_dout2;
+	   pixel_addr <= pixel_addr + 1;
       end
    end
 
-   always_ff @(posedge clk) begin
-      if(rst)
-	id_imm_reg <= 16'd0;
-      else
-	id_imm_reg <= id_imm_in;
- 
-   end
-
+  
+   localparam PIXEL_ADDR_BUFFRSIZE = (FRAME_SIZE*2) + KERNEL_SIZE + 1;
    
-
-   always_ff @(posedge clk) begin
-      if(rst)
-	id_pc = 16'd0;
-      else
-	id_pc = if_pc;
-   end
+   delay
+     #(
+       .LATENCY(PIXEL_ADDR_BUFFERSIZE),
+       .BIT_WIDTH(BITWIDTH)
+       )
+   delay_inst1
+     (
+      .clk(clk),
+      .n_rst(~rst),
+      .din(in_pixel_addr),
+      .dout(out_pixel_addr)
+      );
    
-   always_ff @(posedge clk) begin
-      if (rst) 
-        id_ir <= 16'd0;
-      else
-        id_ir <= if_ir;
-   end
-   
-   // EX (Exectution)
-   //   logic [15:0] ex_result_reg; // Result Register
-   //   logic [15:0] ex_ir;         // Instruction Register
-   //   logic [15:0] ex_operand_reg1;
-   //   logic [15:0] ex_result_in;
-   //   logic 	ex_reg_file_we_in;
-   //   logic 	ex_reg_file_we_reg;
-   
-   
-   
-   always_comb
-     begin
-	if(id_ir[15]==1'b1)
-	  alu_ain = id_pc;
-	else
-	  alu_ain = id_operand_reg1;
-     end
-   
-   always_comb
-     begin
-	if(id_ir[15:11]==5'b00000)
-	  alu_bin = id_operand_reg2;
-	else
-	  alu_bin = id_imm_reg;
-     end
-   
-   always_comb
-     begin
-	if(id_ir[15:11]==5'b00000)
-	  alu_op = id_ir[3:0];
-	else if(id_ir[15] == 1'b1)
-	  alu_op = 4'b0100;
-	else
-	  alu_op = id_ir[14:11];
-     end
-
-   
-   always_comb
-     begin
-	if(id_ir[15:11] <= 5'b00000)
-	  begin
-             if((id_ir[4:0]==5'b10001) || (id_ir[4:0] == 5'b10011))
-	       d_oe <= 1'b1;
-	     else
-	       d_oe <= 1'b0;
-	     
-	  end
-	else
-	  d_oe <= 1'b0;
-     end
-   
-   
-   assign d_addr = id_operand_reg2;
-
-   always_comb
-     begin
-	if((id_ir[15:11]==5'b00000)&(id_ir[4:0]==5'b10010)&(id_operand_reg2[0]==1'b0))
-	  d_dout <= {id_operand_reg1[7:0],8'h00};
-	else
-	  d_dout <= id_operand_reg1;
-     end
-
-   always_comb
-     begin
-	if(id_ir[15:11] == 5'b00000)
-	  if(id_ir[4:0] == 5'b10000)
-	    d_we[1:0] <= 2'b11;	
-	  else if(id_ir[4:0] == 5'b10010)
-	    begin
-	       if(id_operand_reg2[0]==1'b0)
-		 d_we[1:0] <= 2'b01;
-	       else
-		 d_we[1:0] <= 2'b10;
-	    end
-	  else
-	    d_we[1:0] <= 2'b00;
-	else
-	  d_we[1:0] <= 2'b00;
-     end // always_comb
-
-
-   
-   always_comb begin
-      if(id_ir[15:11] == 5'b00000)
-	begin
-	   if(id_ir[4:0] == 5'b10011)
-	     begin
-		if(id_operand_reg2[0] == 1'b0)
-		  ex_result_in <= {8'h00,d_din[15:8]};
-		else
-		  ex_result_in <= {8'h00,d_din[7:0]};
-	     end
 	   
-	   else if(id_ir[4:0] == 5'b10001)
-	     ex_result_in <= d_din;
-	   else
-	     ex_result_in <= alu_dout;
-	end // if (id_ir[15:11] == 5'b00000)
-      else
-	ex_result_in <= alu_dout;
-   end // always_comb
+      
    
-   always_ff @(posedge clk) 
-     begin
-	if (rst) 
-          ex_result_reg <= 16'd0;
-	else 
-	  ex_result_reg <= ex_result_in;
-     end 
+   //------------stencil calucration--------------------
+   integer i;
    
-   
+   reg[KERNEL_SIZE-1:0] stencil_buf1[BITWIDTH-1:0];
+   reg[KERNEL_SIZE-1:0] stencil_buf2[BITWIDTH-1:0];
+   reg[KERNEL_SIZE-1:0] stencil_buf3[BITWIDTH-1:0];
 
-
-
-   always_comb
-     begin
-	if((id_ir ==16'h0000) || (id_ir[15] ==1'b1))
-	  ex_reg_file_we_in <= 1'b0;
-	else if(id_ir[15:11]==5'b00000)
-	  begin
-	     if((id_ir[4:0] == 5'b10000) || (id_ir[4:0] == 5'b10010))
-	       ex_reg_file_we_in <= 1'b0;
-	     else
-	       ex_reg_file_we_in <= 1'b1;
-	  end
-	else
-	  ex_reg_file_we_in = 1'b1;
-     end
-   
-
-   always_ff @(posedge clk) begin
-      if(rst)
-	ex_reg_file_we_reg <= 1'b0;
-      else
-	ex_reg_file_we_reg <= ex_reg_file_we_in;
-   end
+   wire [BITWIDTH-1:0] 	in_line_data1;
+   wire [BITWIDTH-1:0] 	out_line_data1;
+   wire [BITWIDTH-1:0] 	in_line_data2;
+   wire [BITWIDTH-1:0] 	out_line_data2;
    
    
    always_ff @(posedge clk) begin
-      if (rst)
-        ex_ir <= 16'd0;
-      else
-        ex_ir <= id_ir;
-   end
-
-
-
-   
-   
-   // WB (Write Back)
-   assign reg_file_wnum = ex_ir[10:8];
-   assign reg_file_din = ex_result_reg;
-
+      if(rst) begin
+	 for(i = 0;i<KERNEL_SIZE;i = i+1)begin
+	    stencil_buf1[i] <= 'd0;
+	 end
+      end  
+      else begin
+	 for(i=KERNEL_SIZE-1;i>0;i = i-1) begin
+	    stencil_buf1[i] <= stencil_buf1[i-1];
+	 end
+	 stencil_buf1[0] <= buf_pixel;
+      end // else: !if(rst)
+   end // always_ff @ (posedge clk)
    
 
-   assign reg_file_we = ex_reg_file_we_reg; 
+   assign in_line_data1 = stencil_buf1[BITWIDTH-1];
    
    
-/*   always_comb
-    begin
-   	if(ex_ir[15]==1'b1)
-	   
-	  if(ex_ir[14:11]==4'b0000)
-	    if(ex_operand_reg1 == 16'd0)
-	      if_pc_we <= 1'b1;
-	    else
-	      if_pc_we <= 1'b0;
-	
-	  else if(ex_ir[14:11]==4'b0001)
-	    if(ex_operand_reg1 != 16'd0)
-	      if_pc_we <= 1'b1;
-	    else
-	      if_pc_we <= 1'b0;
+   delay
+     #(
+       .LATENCY(LINE_SIZE),
+       .BIT_WIDTH(BITWIDTH)
+       )
+   delay_inst1
+     (
+      .clk(clk),
+      .n_rst(~rst),
+      .din(in_line_data1),
+      .dout(out_line_data1)
+      );
 
-	  else if(ex_ir[14:11]==4'b0010)
-	    if(ex_operand_reg1[15] == 1'b1)
-	      if_pc_we <= 1'b1;
-	    else
-	      if_pc_we <= 1'b0;
-
-	  else if(ex_ir[14:11]==4'b0011)
-	    if(ex_operand_reg1[15] ==1'b0)
-	      if_pc_we <= 1'b1;
-	    else
-	      if_pc_we <= 1'b0;
-
-	  else if(ex_ir[14:11]==4'b1000)
-            if_pc_we <= 1'b1;
-
-	  else
-	    if_pc_we <=1'b0;
-	
-	
-	else
-	  if_pc_we <= 1'b0;
-	
-     end
    
-   assign   if_pc_bta = ex_result_reg;
-   
- */  
-   
-endmodule
-
-
-module reg_file
-  (
-   input wire 	       clk,rst,
-   input wire [2:0]    rnum1,rnum2,
-   output logic [15:0] dout1,dout2,
-   input wire [2:0]    wnum,
-   input wire [15:0]   din,
-   input wire 	       we
-   );
-
-
-
-   logic [15:0]        registers[8];
-
-   assign dout1 = registers[rnum1];
-
-   assign dout2 = registers[rnum2];
-
-
    always_ff @(posedge clk) begin
-      if(rst)
-        registers <= '{default: 16'h0000};
-
-      else if (we)
-        registers[wnum] <= din;
-
-
-   end  
-endmodule
-
-
-module alu16
-  (
-   input wire [15:0]   ain, bin,
-   input wire [3:0]    op,
-   output logic [15:0] dout
-   );
-
-
-   always_comb begin
-      case(op)
-	4'b0000: dout <= ain;
-
-	4'b0001: dout <= bin;
-
-	4'b0010: dout <= ~bin;
-
-	4'b0011: dout <= ain ^ bin;
-
-	4'b0100: dout <= ain+bin;
-
-	4'b0101: dout <= ain - bin;
-
-	4'b0110: dout <= bin << 16'd8;
-
-	4'b0111: dout <= bin >> 16'd8;
-
-	4'b1000: dout <= bin << 16'd1;
-
-	4'b1001: dout <= bin >> 16'd1;
-
-	4'b1010: dout <= ain & bin ;
-
-	4'b1011: dout <= ain | bin;
-
-	4'b1100: dout <= ain * bin;
-	
-	4'b1101: dout <= ain / bin;
-
-	4'b1110: dout <= ain % bin;
-	
-	4'b1111: dout <= bin >> 16'd4;
+      if(rst) begin
+	 for(i = 0;i<KERNEL_SIZE;i = i+1)begin
+	    stencil_buf2[i] <= 'd0;
+	    
+	 end
+      end
+      else begin
+	 for(i=KERNEL_SIZE-1;i>0;i = i-1) begin
+	    stencil_buf2[i] <= stencil_buf2[i-1];    
+	 end
+	 stencil_buf2[0] <= out_line_data1;
 	 
-	default: dout <= 16'dx;
+      end // else: !if(rst)
+   end // always_ff @ (posedge clk)
 
-      endcase // case (op)
+   assign in_line_data2 = stencil_buf2[BITWIDTH-1];
+   
 
+   delay
+     #(
+       .LATENCY(LINE_SIZE),
+       .BIT_WIDTH(BITWIDTH)
+       )
+   delay_inst1
+     (
+      .clk(clk),
+      .n_rst(~rst),
+      .din(in_line_data2),
+      .dout(out_line_data2)
+      );
+
+   always_ff @(posedge clk) begin
+      if(rst) begin
+	 for(i = 0;i<KERNEL_SIZE;i = i+1)begin
+	    stencil_buf3[i] <= 'd0;
+	 end
+      end
+      else begin
+	 for(i=KERNEL_SIZE-1;i>0;i = i-1) begin
+	    stencil_buf3[i] <= stencil_buf3[i-1];
+	 end
+	 stencil_buf3[0] <= out_line_data2;
+      end // else: !if(rst)
+   end // always_ff @ (posedge clk)
+
+
+   
+
+   reg[BITWIDTH-1:0] filter_pdata;
+   wire 	     edge_flag;
+   wire[BITWIDTH:0] 	     calc_pixel;
+
+   assign calc_pixel = stencil_buf3[2]*(-1) + stencil_buf3[1]*(-1) + stencil_buf3[0]*(-1)+
+		       stencil_buf2[2]*(-1) + stencil_buf2[1]*8    + stencil_buf2[0]*(-1)+
+		       stencil_buf1[2]*(-1) + stencil_buf1[1]*(-1) + stencil_buf1[0]*(-1);
+   
+
+   
+   always_ff @(posedge clk) begin
+      if(rst)
+	fileter_pdata <= 'd0;
+      else begin
+	 if(edge_flag)
+	   fileter_pdata <= stencil_buf2[1];
+	 else begin
+	    if(calc_pixel>='d255)
+	      filter_pdata <= 16'd255;
+	    else if(calc_pixel<='d0)
+	      filter_pdata <= 16'd0;
+	    else
+	      filter_pdata <= calc_pixel[15:0];
+	 end
+      end // else: !if(rst)   
+   end // always_ff @ (posedge clk)
+   
+
+  
+   //-------------write memory-------------------------
+			    
+   assign d_oe = 1'b0;
+
+   always_ff @(posedge clk) begin
+      if(rst)
+	d_addr <= 'd0;
+      else
+	d_addr <= out_pixel_addr;
    end
-endmodule // alu16
-
+   
+   always_ff @(posedge clk) begin
+      if(rst)
+	d_dout <= 'd0;
+      else
+	d_dout <= filter_pdata;   
+   end
+   
+   
+   always_ff @(posedge clk) begin
+      if(rst)
+	d_we <= 2'd0;
+      else begin
+	 if(out_pixel_addr[0]==0)
+	   d_we <= 2'b10;
+	 else
+	   d_we <= 2'b01;
+      end
+   end
+   
+   
+endmodule
 `default_nettype wire

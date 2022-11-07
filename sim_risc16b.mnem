@@ -1,0 +1,28 @@
+lui r0 fe
+add r2 0 
+lui r1 ff
+lli r3 0
+add r2 r0
+add r3 r1
+//
+lli r5 64
+//
+lw  r4 r2
+sw  r4 r3
+addi r2 2
+addi r5 -1
+bnez r5 -10
+nop 0 0
+//
+lli r2 1
+add r2 r0
+lli r5 63
+//
+lw r4 r2
+sw r4 r3
+addi r2 128
+addi r5 -1
+bnez r5 -10
+nop 0 0
+
+
