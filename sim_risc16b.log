@@ -1,5 +1,5 @@
 # vsim -c sim_risc16b -l sim_risc16b.log -wlf sim_risc16b.wlf -do "add wave -r /sim_risc16b/risc16b_inst/*; run -all" 
-# Start time: 03:17:39 on Nov 08,2022
+# Start time: 11:32:17 on Nov 08,2022
 # Loading sv_std.std
 # Loading work.sim_risc16b
 # Loading work.risc16b
@@ -66626,5 +66626,5 @@
 # in_pixel_addr = c083
 # ** Note: $finish    : sim_risc16b.sv(157)
 #    Time: 330410 ns  Iteration: 0  Instance: /sim_risc16b
-# End time: 03:17:41 on Nov 08,2022, Elapsed time: 0:00:02
+# End time: 11:32:19 on Nov 08,2022, Elapsed time: 0:00:02
 # Errors: 0, Warnings: 0
