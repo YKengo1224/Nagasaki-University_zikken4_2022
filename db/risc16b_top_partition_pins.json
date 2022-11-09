@@ -264,15 +264,7 @@
 					"strict" : false
 				},
 				{
-					"name" : "SRAM_LB_n",
-					"strict" : false
-				},
-				{
 					"name" : "SRAM_OE_n",
-					"strict" : false
-				},
-				{
-					"name" : "SRAM_UB_n",
 					"strict" : false
 				},
 				{

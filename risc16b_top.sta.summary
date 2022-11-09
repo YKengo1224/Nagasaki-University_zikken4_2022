@@ -1,0 +1,49 @@
+------------------------------------------------------------
+Timing Analyzer Summary
+------------------------------------------------------------
+
+Type  : Setup 'vclk'
+Slack : -7.005
+TNS   : -7.005
+
+Type  : Setup 'processor_clk'
+Slack : 0.012
+TNS   : 0.000
+
+Type  : Setup 'sys_clk'
+Slack : 0.961
+TNS   : 0.000
+
+Type  : Setup 'clk_div16'
+Slack : 75.012
+TNS   : 0.000
+
+Type  : Hold 'clk_div16'
+Slack : 0.329
+TNS   : 0.000
+
+Type  : Hold 'processor_clk'
+Slack : 0.329
+TNS   : 0.000
+
+Type  : Hold 'sys_clk'
+Slack : 0.374
+TNS   : 0.000
+
+Type  : Hold 'vclk'
+Slack : 9.303
+TNS   : 0.000
+
+Type  : Minimum Pulse Width 'processor_clk'
+Slack : 0.834
+TNS   : 0.000
+
+Type  : Minimum Pulse Width 'sys_clk'
+Slack : 1.438
+TNS   : 0.000
+
+Type  : Minimum Pulse Width 'clk_div16'
+Slack : 38.764
+TNS   : 0.000
+
+------------------------------------------------------------

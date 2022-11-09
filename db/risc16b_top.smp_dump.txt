@@ -1,12 +1,4 @@
 
-State Machine - |risc16b_top|processor_lock_state
-Name processor_lock_state.FREE processor_lock_state.LOCK processor_lock_state.RESET processor_lock_state.INIT processor_lock_state.STEP 
-processor_lock_state.INIT 0 0 0 0 0 
-processor_lock_state.RESET 0 0 1 1 0 
-processor_lock_state.LOCK 0 1 0 1 0 
-processor_lock_state.FREE 1 0 0 1 0 
-processor_lock_state.STEP 0 0 0 1 1 
-
 State Machine - |risc16b_top|main_state
 Name main_state.U2 main_state.U1 main_state.U0 main_state.I0 main_state.D3 main_state.D2 main_state.D1 main_state.D0 
 main_state.D0 0 0 0 0 0 0 0 0 
@@ -17,6 +9,14 @@ main_state.I0 0 0 0 1 0 0 0 1
 main_state.U0 0 0 1 0 0 0 0 1 
 main_state.U1 0 1 0 0 0 0 0 1 
 main_state.U2 1 0 0 0 0 0 0 1 
+
+State Machine - |risc16b_top|processor_lock_state
+Name processor_lock_state.FREE processor_lock_state.LOCK processor_lock_state.RESET processor_lock_state.INIT processor_lock_state.STEP 
+processor_lock_state.INIT 0 0 0 0 0 
+processor_lock_state.RESET 0 0 1 1 0 
+processor_lock_state.LOCK 0 1 0 1 0 
+processor_lock_state.FREE 1 0 0 1 0 
+processor_lock_state.STEP 0 0 0 1 1 
 
 State Machine - |risc16b_top|uart_reg_file:uart_reg_file_0|rs232c_endpoint:rs232c_endpoint_0|state
 Name state.ST_BREAD state.ST_BREAD_WAIT state.ST_WRITE state.ST_READ state.ST_READ_WAIT state.ST_ADDR_FETCH state.ST_IDLE 
