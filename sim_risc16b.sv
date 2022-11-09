@@ -78,36 +78,8 @@ module sim_risc16b;
    end
 
    task print();
-      if(risc16b_inst.in_pixel_buffer['h4000] == 'h0063) begin 
-//      if(1) begin
+      if(1) begin
       $write("==== clock: %1d ====\n", $rtoi($time / CLOCK_PERIOD_NS) - 1);
-
-	 $write("if_pc = %x\n",risc16b_inst.if_pc);
-	 
-      $write("if_ir = %x\n",risc16b_inst.if_ir);
-      $write("we = %b\n",risc16b_inst.we);
-      
-      $write("w_addr = %x\n",risc16b_inst.in_pibuf_waddr);
-	 $write("hoge ====  %x\n",risc16b_inst.in_pixel_buffer['h4000]);
-	 
-      
-    //  $write("stencil_buf3[0] = %x\n",risc16b_inst.stencil_buf3[0]);
-	 //  $write("stencil_buf2[1] = %x\n",risc16b_inst.stencil_buf2[1]);
-	 $write("buf_data = %x\n",risc16b_inst.buf_pixel);
-	 
-      $write("in_pixel_addr = %x\n",risc16b_inst.in_pixel_addr);
-     // $write("addr+1         = %x\n",risc16b_inst.out_pixel_addr+1);
-      
-     // $write("out_pixel_addr = %x\n",risc16b_inst.out_pixel_addr);
-     // $write("filter_pdata   = %x\n",risc16b_inst.filter_pdata);
-     // $write("calc_pixel     = %d\n",risc16b_inst.calc_pixel);
-      
-     // $write("d_addr         = %x\n",d_addr);
-     // $write("d_dout         = %x\n",d_dout);
-
-     // $write("d_we           = %x\n",d_we);
-      
-      
       
       /*
       $write(" if_pc= %x  if_ir= %b (%x)\n",
